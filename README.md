@@ -1,4 +1,4 @@
-# Groq-AI-Chat
+# Groq AI Chat
 
 Terminal-based AI chat client written in [Rust](https://www.rust-lang.org/).  
 Built with [Crossterm](https://github.com/crossterm-rs/crossterm) and [Groq API](https://groq.com/).  
