@@ -2,7 +2,7 @@ use crossterm::{
     cursor::{MoveRight, MoveTo, MoveToNextLine, Show},
     execute, queue,
     style::{Color, Print, SetForegroundColor},
-    terminal::{Clear, ClearType, EnableLineWrap, SetSize},
+    terminal::{EnableLineWrap, SetSize},
 };
 use std::io::{self, Stdout, Write};
 
@@ -43,9 +43,6 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
                 SetForegroundColor(Color::Blue),
                 Print("You: "),
                 SetForegroundColor(Color::Reset),
-                Print(&message.content),
-                MoveToNextLine(2),
-                MoveRight(1),
             )?;
         } else if message.role == "assistant" {
             queue!(
@@ -53,11 +50,15 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
                 SetForegroundColor(Color::DarkRed),
                 Print("AI: "),
                 SetForegroundColor(Color::Reset),
-                Print(&message.content),
-                MoveToNextLine(2),
-                MoveRight(1),
             )?;
         }
+
+        let wrapped_text = textwrap::wrap(&message.content, app.size.0 as usize - 7);
+
+        for text in wrapped_text.iter() {
+            queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
+        }
+        queue!(stdout, MoveToNextLine(1), MoveRight(1))?;
     }
 
     match &app.popup {
@@ -66,15 +67,23 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
         Popup::Status => popup_status(stdout, &app.size, &app.messages)?,
         Popup::Error(msg) => popup_error(stdout, &app.size, msg.as_str())?,
         Popup::None => {
+            let wrap_text = textwrap::wrap(app.input.as_str(), app.size.0 as usize - 11);
+
             queue!(
                 stdout,
                 MoveTo(1, app.size.1 - 4),
                 SetForegroundColor(Color::Blue),
                 Print("Message: "),
                 SetForegroundColor(Color::Reset),
-                Show,
-                Print(app.input.clone()),
             )?;
+
+            for (i, text) in wrap_text.iter().enumerate() {
+                queue!(stdout, Show, Print(text))?;
+
+                if i + 1 != wrap_text.len() {
+                    queue!(stdout, MoveToNextLine(1), MoveRight(1))?;
+                }
+            }
         }
     }
 
@@ -146,24 +155,21 @@ pub fn draw_box_with_title(
 }
 
 pub fn screen_size_warning(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
-    let mut text = format!(
-        "Terminal size is too low! Width: {}, Height: {}",
+    let raw_text = format!(
+        "Terminal size is too low! Width: {}, Height: {}
+Set your terminal size to minimum Width: 80, Height: 20",
         size.0, size.1
     );
-    let mut x_pos = (size.0 - text.len() as u16) / 2;
-    let y_pos = size.1 / 2;
+    let wrap_text = textwrap::wrap(raw_text.as_str(), size.0 as usize);
 
-    execute!(
-        stdout,
-        Clear(ClearType::All),
-        MoveTo(x_pos, y_pos - 1),
-        Print(text),
-    )?;
+    let mut y_pos = size.1 / 2 - 1;
+    execute!(stdout, MoveTo(0, y_pos - 1))?;
 
-    text = "Set your terminal size to minimum Width = 100, Height = 20".into();
-    x_pos = (size.0 - text.len() as u16) / 2;
-
-    execute!(stdout, MoveTo(x_pos, y_pos + 1), Print(text))?;
+    for text in wrap_text.iter() {
+        let x_pos = (size.0 - text.len() as u16) / 2;
+        y_pos += 1;
+        execute!(stdout, MoveTo(x_pos, y_pos), Print(text))?;
+    }
 
     Ok(())
 }
