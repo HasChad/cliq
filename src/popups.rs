@@ -9,8 +9,8 @@ use crossterm::{
 use crate::{ai_logic::Message, tui::draw_box_with_title};
 
 pub fn popup_welcome(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
-    let x_size = 71;
-    let y_size = 5;
+    let x_size = 38;
+    let y_size = 6;
     let x_pos = (size.0 - x_size) / 2;
     let y_pos = (size.1 - y_size) / 2;
 
@@ -26,14 +26,17 @@ pub fn popup_welcome(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
 
     queue!(
         stdout,
-        SetForegroundColor(Color::Yellow),
         MoveTo(x_pos + 1, y_pos + 1),
-        Print("Welcome to AI Chat!".bold()),
-        SetForegroundColor(Color::Blue),
+        SetForegroundColor(Color::Yellow),
+        Print("      Welcome to Groq AI Chat!".bold()),
         MoveTo(x_pos + 1, y_pos + 2),
-        Print("Type 'exit' to quit, 'clear' to clear history, or 'help' for commands"),
+        SetForegroundColor(Color::Yellow),
+        Print("────────────────────────────────────"),
+        SetForegroundColor(Color::Blue),
         MoveTo(x_pos + 1, y_pos + 3),
-        Print("Press 'p' to close this pop-up"),
+        Print("- Type 'help' for available commands"),
+        MoveTo(x_pos + 1, y_pos + 4),
+        Print("- Press 'p' to close pop-ups"),
         SetForegroundColor(Color::Reset),
     )?;
 
