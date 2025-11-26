@@ -53,11 +53,9 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
             )?;
         }
 
-        let wrapped_text = textwrap::wrap(&message.content, app.size.0 as usize - 7);
+        let wrapped_text = textwrap::fill(&message.content, app.size.0 as usize - 7);
 
-        for text in wrapped_text.iter() {
-            queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
-        }
+        queue!(stdout, Print(wrapped_text), MoveToNextLine(1), MoveRight(1))?;
         queue!(stdout, MoveToNextLine(1), MoveRight(1))?;
     }
 
@@ -80,7 +78,10 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
             for (i, text) in wrap_text.iter().enumerate() {
                 queue!(stdout, Show, Print(text))?;
 
-                if i + 1 != wrap_text.len() {
+                if i + 1 == wrap_text.len() {
+                    let count = app.input.len() - app.input.trim_end().len();
+                    queue!(stdout, Show, Print(" ".repeat(count)))?;
+                } else {
                     queue!(stdout, MoveToNextLine(1), MoveRight(1))?;
                 }
             }
