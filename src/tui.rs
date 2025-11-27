@@ -6,7 +6,7 @@ use crossterm::{
 };
 use std::io::{self, Stdout, Write};
 
-use crate::{App, Popup, popups::*};
+use crate::{App, Popup, input::MAX_INPUT_LENGTH, popups::*};
 
 pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
     let chat_box = (app.size.0, app.size.1 - 5);
@@ -28,7 +28,7 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
         message_box.1,
         0,
         chat_box.1,
-        "Message".into(),
+        format!("Message | {}/{}", app.input.len(), MAX_INPUT_LENGTH),
         Color::White,
     )?;
 

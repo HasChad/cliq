@@ -47,6 +47,7 @@ fn main() -> io::Result<()> {
     dotenv().ok();
     let mut stdout = io::stdout();
     let system_message = Message::ai_character();
+
     let api_key = match env::var("GROQ_API_KEY") {
         Ok(env) => env,
         Err(_) => {

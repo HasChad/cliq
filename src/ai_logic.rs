@@ -6,7 +6,6 @@ use crate::popups::popup_sending_message;
 use crate::{App, Popup};
 
 const MAX_HISTORY_MESSAGES: usize = 50;
-pub const MAX_INPUT_LENGTH: usize = 4000;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Message {
@@ -64,13 +63,6 @@ pub enum ChatError {
     Io,
     Network,
     ApiResponse,
-    InputTooLong,
-}
-
-impl From<env::VarError> for ChatError {
-    fn from(_err: env::VarError) -> Self {
-        ChatError::EnvVar
-    }
 }
 
 impl From<io::Error> for ChatError {
@@ -105,7 +97,7 @@ pub fn manage_history(messages: &mut Vec<Message>) {
 pub fn send_chat_request(stdout: &mut Stdout, app: &mut App) -> Result<String, ChatError> {
     let model = match env::var("AI_MODEL") {
         Ok(env) => env,
-        Err(_) => "bruh".into(),
+        Err(_) => return Err(ChatError::EnvVar),
     };
 
     let request = ChatRequest {
@@ -127,6 +119,7 @@ pub fn send_chat_request(stdout: &mut Stdout, app: &mut App) -> Result<String, C
         let error_text = response
             .text()
             .unwrap_or_else(|_| "Unknown error".to_string());
+
         app.popup = Popup::Error(format!("HTTP {}: {}", status, error_text));
         return Err(ChatError::Network);
     }
@@ -134,7 +127,8 @@ pub fn send_chat_request(stdout: &mut Stdout, app: &mut App) -> Result<String, C
     let chat_response: ChatResponse = response.json()?;
 
     if chat_response.choices.is_empty() {
-        app.popup = Popup::Error("No response choices received".into())
+        app.popup = Popup::Error("No response choices received".into());
+        return Err(ChatError::ApiResponse);
     }
 
     Ok(chat_response.choices[0].message.content.clone())

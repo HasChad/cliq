@@ -7,8 +7,10 @@ use std::io::Stdout;
 
 use crate::{
     App, Popup,
-    ai_logic::{ChatError, MAX_INPUT_LENGTH, Message, manage_history, send_chat_request},
+    ai_logic::{ChatError, Message, manage_history, send_chat_request},
 };
+
+pub const MAX_INPUT_LENGTH: usize = 1000;
 
 pub fn input_controller(stdout: &mut Stdout, event: KeyEvent, app: &mut App) {
     if app.popup != Popup::None {
@@ -35,6 +37,14 @@ pub fn input_controller(stdout: &mut Stdout, event: KeyEvent, app: &mut App) {
 
 pub fn process_input(stdout: &mut Stdout, app: &mut App) {
     if app.input.is_empty() {
+        return;
+    }
+
+    if app.input.len() > MAX_INPUT_LENGTH {
+        app.popup = Popup::Error(format!(
+            "Input too long (max {} characters)",
+            MAX_INPUT_LENGTH
+        ));
         return;
     }
 
@@ -68,17 +78,12 @@ pub fn process_input(stdout: &mut Stdout, app: &mut App) {
 
     match send_chat_request(stdout, app) {
         Ok(reply) => app.messages.push(Message::ai_reply(reply)),
+        Err(ChatError::EnvVar) => app.popup = Popup::Error("Please check your AI model".into()),
         Err(ChatError::Network) => {
             app.popup = Popup::Error("Network error: Please check your internet connection.".into())
         }
         Err(ChatError::ApiResponse) => {
             app.popup = Popup::Error("API error: Please check your API key and try again.".into())
-        }
-        Err(ChatError::InputTooLong) => {
-            app.popup = Popup::Error(format!(
-                "Input too long (max {} characters)",
-                MAX_INPUT_LENGTH
-            ))
         }
         Err(_) => app.popup = Popup::Error("Unexpected error.".into()),
     }
