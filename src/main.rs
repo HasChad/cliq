@@ -8,7 +8,7 @@ use crossterm::{
     },
 };
 use dotenvy::dotenv;
-use std::io::{self};
+use std::io::{self, BufWriter, stdout};
 
 mod ai_logic;
 mod app;
@@ -20,18 +20,10 @@ use app::*;
 use input::*;
 use tui::*;
 
-#[derive(PartialEq)]
-pub enum Popup {
-    None,
-    Welcome,
-    Help,
-    Status,
-    Error(String),
-}
-
 fn main() -> io::Result<()> {
     dotenv().ok();
-    let mut stdout = io::stdout();
+    let mut stdout = BufWriter::with_capacity(640000, stdout());
+    let mut stdout = stdout.get_mut();
     let mut app = App::init()?;
 
     execute!(

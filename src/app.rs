@@ -6,9 +6,18 @@ use std::{
     io, process,
 };
 
-use crate::{Popup, ai_logic::Message};
+use crate::ai_logic::Message;
 
 pub const FILE_PATH: &str = "messages.json";
+
+#[derive(PartialEq)]
+pub enum Popup {
+    None,
+    Welcome,
+    Help,
+    Status,
+    Error(String),
+}
 
 pub struct App {
     pub run: bool,
@@ -18,6 +27,7 @@ pub struct App {
     pub client: Client,
     pub input: String,
     pub popup: Popup,
+    pub scroll: u32,
 }
 
 impl App {
@@ -62,6 +72,7 @@ impl App {
             input: String::new(),
             size: size()?,
             popup: Popup::Welcome,
+            scroll: 0,
         })
     }
 }

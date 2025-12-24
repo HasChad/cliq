@@ -28,7 +28,7 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
         message_box.1,
         0,
         chat_box.1,
-        format!("Message | {}/{}", app.input.len(), MAX_INPUT_LENGTH),
+        format!("Message | {}/{}", app.input.len(), MAX_INPUT_LENGTH,),
         Color::White,
     )?;
 
@@ -56,13 +56,19 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
     }
 
     let wrapped_text = textwrap::wrap(&string_message, app.size.0 as usize - 7);
-    let max_line = if wrapped_text.len() > chat_box.1 as usize - 2 {
-        chat_box.1 as usize - 2
-    } else {
-        wrapped_text.len()
-    };
 
-    for text in &wrapped_text[0..max_line] {
+    let mut start_line = 0;
+    let mut end_line = wrapped_text.len();
+
+    if wrapped_text.len() > chat_box.1 as usize - 2 {
+        if app.scroll > wrapped_text.len() as u32 - chat_box.1 as u32 {
+            app.scroll = wrapped_text.len() as u32 - chat_box.1 as u32
+        }
+        start_line = app.scroll as usize;
+        end_line = chat_box.1 as usize - 2 + app.scroll as usize;
+    }
+
+    for text in &wrapped_text[start_line..end_line] {
         queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
     }
 
@@ -113,27 +119,27 @@ pub fn draw_box(
     queue!(
         stdout,
         MoveTo(x_pos, y_pos),
-        Print("╭"),
-        Print("─".repeat((width - 2) as usize)),
-        Print("╮")
+        Print("┏"),
+        Print("━".repeat((width - 2) as usize)),
+        Print("┓")
     )?;
 
     for y in 1..height - 1 {
         queue!(
             stdout,
             MoveTo(x_pos, y_pos + y),
-            Print("│"),
+            Print("┃"),
             Print(" ".repeat((width - 2) as usize)),
-            Print("│")
+            Print("┃")
         )?;
     }
 
     queue!(
         stdout,
         MoveTo(x_pos, y_pos + height - 1),
-        Print("╰"),
-        Print("─".repeat((width - 2) as usize)),
-        Print("╯")
+        Print("┗"),
+        Print("━".repeat((width - 2) as usize)),
+        Print("┛")
     )?;
 
     queue!(stdout, SetForegroundColor(Color::Reset))?;

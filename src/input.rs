@@ -30,6 +30,12 @@ pub fn input_controller(stdout: &mut Stdout, event: KeyEvent, app: &mut App) {
             KeyCode::Left => {
                 let _ = queue!(stdout, MoveLeft(1));
             }
+            KeyCode::Up => {
+                if app.scroll > 0 {
+                    app.scroll -= 1
+                }
+            }
+            KeyCode::Down => app.scroll += 1,
             KeyCode::Esc => app.run = false,
             _ => (),
         }
