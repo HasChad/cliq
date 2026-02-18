@@ -1,9 +1,8 @@
-use crossterm::terminal::size;
 use reqwest::blocking::Client;
 use std::{
     env,
     fs::{self, File},
-    io, process,
+    process,
 };
 
 use crate::ai_logic::Message;
@@ -21,7 +20,6 @@ pub enum Popup {
 
 pub struct App {
     pub run: bool,
-    pub size: (u16, u16),
     pub messages: Vec<Message>,
     pub api_key: String,
     pub client: Client,
@@ -31,7 +29,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn init() -> io::Result<Self> {
+    pub fn init() -> Self {
         let system_message = Message::ai_character();
         let api_key = match env::var("GROQ_API_KEY") {
             Ok(env) => env,
@@ -64,15 +62,14 @@ impl App {
             }
         };
 
-        Ok(Self {
+        Self {
             run: true,
             messages,
             api_key,
             client: Client::new(),
             input: String::new(),
-            size: size()?,
             popup: Popup::Welcome,
             scroll: 0,
-        })
+        }
     }
 }

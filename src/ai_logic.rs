@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::io::{self, BufWriter, Stdout};
+use std::io::{self};
 
-use crate::popups::popup_sending_message;
 use crate::{App, Popup};
 
 const MAX_HISTORY_MESSAGES: usize = 50;
@@ -94,10 +93,7 @@ pub fn manage_history(messages: &mut Vec<Message>) {
     }
 }
 
-pub fn send_chat_request(
-    stdout: &mut BufWriter<Stdout>,
-    app: &mut App,
-) -> Result<String, ChatError> {
+pub fn send_chat_request(app: &mut App) -> Result<String, ChatError> {
     let model = match env::var("AI_MODEL") {
         Ok(env) => env,
         Err(_) => return Err(ChatError::EnvVar),
@@ -108,7 +104,8 @@ pub fn send_chat_request(
         messages: app.messages.to_vec(),
     };
 
-    popup_sending_message(stdout, &app.size)?;
+    // needs fixing
+    // popup_sending_message(frame);
 
     let response = app
         .client

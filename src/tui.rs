@@ -1,37 +1,17 @@
-use crossterm::{
-    cursor::{MoveRight, MoveTo, MoveToNextLine, Show},
-    execute, queue,
-    style::{Color, Print, SetForegroundColor},
+use ratatui::{
+    Frame,
+    layout::{Constraint, Direction, Layout},
+    style::{Color, Stylize},
+    widgets::{Block, BorderType, Borders, Paragraph, TitlePosition, Wrap},
 };
-use std::io::{self, BufWriter, Stdout, Write};
 
 use crate::{App, Popup, input::MAX_INPUT_LENGTH, popups::*};
 
-pub fn render(stdout: &mut BufWriter<Stdout>, app: &mut App) -> io::Result<()> {
-    let chat_box = (app.size.0, app.size.1 - 5);
-    let message_box = (app.size.0, 5);
-
-    draw_box_with_title(
-        stdout,
-        chat_box.0,
-        chat_box.1,
-        0,
-        0,
-        "Chat".into(),
-        Color::DarkYellow,
-    )?;
-
-    draw_box_with_title(
-        stdout,
-        message_box.0,
-        message_box.1,
-        0,
-        chat_box.1,
-        format!("Message | {}/{}", app.input.len(), MAX_INPUT_LENGTH,),
-        Color::White,
-    )?;
-
-    queue!(stdout, MoveTo(1, 1))?;
+pub fn render(app: &mut App, frame: &mut Frame) {
+    let outer_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(vec![Constraint::Percentage(90), Constraint::Percentage(10)])
+        .split(frame.area());
 
     // chat text
     let mut string_message = String::new();
@@ -49,114 +29,54 @@ pub fn render(stdout: &mut BufWriter<Stdout>, app: &mut App) -> io::Result<()> {
         string_message.push_str("\n\n");
     }
 
-    let wrapped_text = textwrap::wrap(&string_message, app.size.0 as usize - 7);
+    frame.render_widget(
+        Paragraph::new(string_message)
+            .fg(Color::White)
+            .wrap(Wrap { trim: true })
+            // .scroll(offset)
+            .block(
+                Block::new()
+                    .fg(Color::Blue)
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Thick)
+                    .title(" Chat ")
+                    .title_position(TitlePosition::Top),
+            ),
+        outer_layout[0],
+    );
 
-    let mut start_line = 0;
-    let mut end_line = wrapped_text.len();
-
-    if wrapped_text.len() > chat_box.1 as usize - 2 {
-        if app.scroll > wrapped_text.len() as u32 - chat_box.1 as u32 {
-            app.scroll = wrapped_text.len() as u32 - chat_box.1 as u32
-        }
-        start_line = app.scroll as usize;
-        end_line = chat_box.1 as usize - 2 + app.scroll as usize;
-    }
-
-    for text in &wrapped_text[start_line..end_line] {
-        queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
-    }
+    frame.render_widget(
+        Paragraph::new(app.input.clone())
+            .fg(Color::White)
+            .wrap(Wrap { trim: true })
+            .block(
+                Block::new()
+                    .fg(Color::Green)
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Thick)
+                    .title(format!(
+                        " Message | {}/{} ",
+                        app.input.len(),
+                        MAX_INPUT_LENGTH,
+                    ))
+                    .title_position(TitlePosition::Top),
+            ),
+        outer_layout[1],
+    );
 
     match &app.popup {
-        Popup::Welcome => popup_welcome(stdout, &app.size)?,
-        Popup::Help => popup_help(stdout, &app.size)?,
-        Popup::Status => popup_status(stdout, &app.size, &app.messages)?,
-        Popup::Error(msg) => popup_error(stdout, &app.size, msg.as_str())?,
-        Popup::None => {
-            let wrap_text = textwrap::wrap(app.input.as_str(), app.size.0 as usize - 11);
-
-            queue!(
-                stdout,
-                MoveTo(1, app.size.1 - 4),
-                SetForegroundColor(Color::Blue),
-                Print("Message: "),
-                SetForegroundColor(Color::Reset),
-            )?;
-
-            for (i, text) in wrap_text.iter().enumerate() {
-                queue!(stdout, Show, Print(text))?;
-
-                if i + 1 == wrap_text.len() {
-                    let count = app.input.len() - app.input.trim_end().len();
-                    queue!(stdout, Show, Print(" ".repeat(count)))?;
-                } else {
-                    queue!(stdout, MoveToNextLine(1), MoveRight(1))?;
-                }
-            }
-        }
+        Popup::Welcome => popup_welcome(frame),
+        Popup::Help => popup_help(frame),
+        Popup::Status => popup_status(frame, &app.messages),
+        Popup::Error(msg) => popup_error(frame, msg.as_str()),
+        Popup::None => {}
     }
-
-    stdout.flush()?;
-
-    Ok(())
 }
 
-pub fn draw_box_with_title(
-    stdout: &mut BufWriter<Stdout>,
-    width: u16,
-    height: u16,
-    x_pos: u16,
-    y_pos: u16,
-    title: String,
-    color: Color,
-) -> io::Result<()> {
-    queue!(
-        stdout,
-        SetForegroundColor(color),
-        MoveTo(x_pos, y_pos),
-        Print("┏"),
-        Print(format!(" {} ", title)),
-        Print("━".repeat((width - 4 - title.len() as u16) as usize)),
-        Print("┓")
-    )?;
-
-    for y in 1..height - 1 {
-        queue!(
-            stdout,
-            MoveTo(x_pos, y_pos + y),
-            Print("┃"),
-            Print(" ".repeat((width - 2) as usize)),
-            Print("┃")
-        )?;
-    }
-
-    queue!(
-        stdout,
-        MoveTo(x_pos, y_pos + height - 1),
-        Print("┗"),
-        Print("━".repeat((width - 2) as usize)),
-        Print("┛"),
-        SetForegroundColor(Color::Reset)
-    )?;
-
-    Ok(())
-}
-
-pub fn screen_size_warning(stdout: &mut BufWriter<Stdout>, size: &(u16, u16)) -> io::Result<()> {
-    let raw_text = format!(
+pub fn screen_size_warning(frame: &mut Frame) {
+    let greeting = Paragraph::new(
         "Terminal size is too low! Width: {}, Height: {}
 Set your terminal size to minimum Width: 80, Height: 20",
-        size.0, size.1
     );
-    let wrap_text = textwrap::wrap(raw_text.as_str(), size.0 as usize);
-
-    let mut y_pos = size.1 / 2 - 1;
-    execute!(stdout, MoveTo(0, y_pos - 1))?;
-
-    for text in wrap_text.iter() {
-        let x_pos = (size.0 - text.len() as u16) / 2;
-        y_pos += 1;
-        execute!(stdout, MoveTo(x_pos, y_pos), Print(text))?;
-    }
-
-    Ok(())
+    frame.render_widget(greeting, frame.area());
 }

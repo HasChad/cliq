@@ -1,15 +1,3 @@
-use crossterm::{
-    cursor::Hide,
-    event::{Event, read},
-    execute, queue,
-    terminal::{
-        Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, SetTitle, disable_raw_mode,
-        enable_raw_mode,
-    },
-};
-use dotenvy::dotenv;
-use std::io::{self, BufWriter, stdout};
-
 mod ai_logic;
 mod app;
 mod input;
@@ -20,39 +8,38 @@ use app::*;
 use input::*;
 use tui::*;
 
-fn main() -> io::Result<()> {
+use color_eyre::{Result, eyre::Context};
+use dotenvy::dotenv;
+use ratatui::{
+    DefaultTerminal,
+    crossterm::event::{Event, read},
+};
+
+fn main() -> Result<()> {
     dotenv().ok();
-    let mut stdout = BufWriter::with_capacity(640000, stdout());
-    let mut app = App::init()?;
+    let mut app = App::init();
 
-    execute!(
-        stdout,
-        SetTitle("Groq AI Chat"),
-        EnterAlternateScreen,
-        Clear(ClearType::All),
-        Hide
-    )?;
-    enable_raw_mode()?;
-    render(&mut stdout, &mut app)?;
+    color_eyre::install()?;
+    let terminal = ratatui::init();
+    let app_result = run(&mut app, terminal).context("app loop failed");
+    ratatui::restore();
+    app_result
+}
 
+fn run(mut app: &mut App, mut terminal: DefaultTerminal) -> Result<()> {
     while app.run {
-        match read()? {
-            Event::Resize(width, height) => app.size = (width, height),
-            Event::Key(event) => input_controller(&mut stdout, event, &mut app),
+        terminal.draw(|frame| render(&mut app, frame))?;
+
+        match read().unwrap() {
+            Event::Key(event) => input_controller(event, &mut app),
             _ => (),
         }
 
-        queue!(stdout, Clear(ClearType::All), Hide)?;
-
-        if app.size.0 < 80 || app.size.1 < 20 {
-            screen_size_warning(&mut stdout, &app.size)?;
-            continue;
-        }
-
-        render(&mut stdout, &mut app)?;
+        // if app.size.0 < 80 || app.size.1 < 20 {
+        //     terminal.draw(screen_size_warning)?;
+        //     continue;
+        // }
     }
 
-    disable_raw_mode()?;
-    execute!(stdout, LeaveAlternateScreen)?;
     Ok(())
 }

@@ -1,12 +1,6 @@
-use crossterm::{
-    cursor::MoveLeft,
-    event::{KeyCode, KeyEvent},
-    queue,
-};
-use std::{
-    fs,
-    io::{BufWriter, Stdout},
-};
+use std::fs;
+
+use ratatui::crossterm::event::{KeyCode, KeyEvent};
 
 use crate::{
     App, Popup,
@@ -16,7 +10,7 @@ use crate::{
 
 pub const MAX_INPUT_LENGTH: usize = 1000;
 
-pub fn input_controller(stdout: &mut BufWriter<Stdout>, event: KeyEvent, app: &mut App) {
+pub fn input_controller(event: KeyEvent, app: &mut App) {
     if app.popup != Popup::None {
         if event.code == KeyCode::Char('q') {
             app.popup = Popup::None;
@@ -24,15 +18,13 @@ pub fn input_controller(stdout: &mut BufWriter<Stdout>, event: KeyEvent, app: &m
     } else {
         match event.code {
             KeyCode::Char(c) => app.input.push(c),
-            KeyCode::Enter => process_input(stdout, app),
+            KeyCode::Enter => process_input(app),
             KeyCode::Backspace => {
                 if app.input.len() != 0 {
                     app.input.pop();
                 }
             }
-            KeyCode::Left => {
-                let _ = queue!(stdout, MoveLeft(1));
-            }
+            KeyCode::Left => {}
             KeyCode::Up => {
                 if app.scroll > 0 {
                     app.scroll -= 1
@@ -45,7 +37,7 @@ pub fn input_controller(stdout: &mut BufWriter<Stdout>, event: KeyEvent, app: &m
     }
 }
 
-pub fn process_input(stdout: &mut BufWriter<Stdout>, app: &mut App) {
+pub fn process_input(app: &mut App) {
     if app.input.is_empty() {
         return;
     }
@@ -87,7 +79,7 @@ pub fn process_input(stdout: &mut BufWriter<Stdout>, app: &mut App) {
     app.input.clear();
     manage_history(&mut app.messages);
 
-    match send_chat_request(stdout, app) {
+    match send_chat_request(app) {
         Ok(reply) => {
             app.messages.push(Message::ai_reply(reply.clone()));
 
