@@ -28,17 +28,16 @@ fn main() -> Result<()> {
 
 fn run(mut app: &mut App, mut terminal: DefaultTerminal) -> Result<()> {
     while app.run {
-        terminal.draw(|frame| render(&mut app, frame))?;
+        if terminal.get_frame().area().width < 80 || terminal.get_frame().area().height < 20 {
+            terminal.draw(screen_size_warning)?;
+        } else {
+            terminal.draw(|frame| render(&mut app, frame))?;
 
-        match read().unwrap() {
-            Event::Key(event) => input_controller(event, &mut app),
-            _ => (),
+            match read().unwrap() {
+                Event::Key(event) => input_controller(event, &mut app),
+                _ => (),
+            }
         }
-
-        // if app.size.0 < 80 || app.size.1 < 20 {
-        //     terminal.draw(screen_size_warning)?;
-        //     continue;
-        // }
     }
 
     Ok(())

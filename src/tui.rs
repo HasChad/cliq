@@ -1,7 +1,8 @@
 use ratatui::{
     Frame,
-    layout::{Constraint, Direction, Layout},
-    style::{Color, Stylize},
+    layout::{Alignment, Constraint, Direction, Layout, VerticalAlignment},
+    style::{Color, Style, Stylize},
+    text::{Line, Span, Text},
     widgets::{Block, BorderType, Borders, Paragraph, TitlePosition, Wrap},
 };
 
@@ -10,30 +11,40 @@ use crate::{App, Popup, input::MAX_INPUT_LENGTH, popups::*};
 pub fn render(app: &mut App, frame: &mut Frame) {
     let outer_layout = Layout::default()
         .direction(Direction::Vertical)
-        .constraints(vec![Constraint::Percentage(90), Constraint::Percentage(10)])
+        .constraints(vec![Constraint::Percentage(90), Constraint::Min(5)])
         .split(frame.area());
 
     // chat text
-    let mut string_message = String::new();
+    let mut lines = vec![];
 
     for message in app.messages.iter() {
         if message.role == "user" {
-            string_message.push_str("You: ");
+            lines.push(Line::from(vec![
+                Span::styled("You: ", Style::default().fg(Color::Blue)),
+                Span::styled(&message.content, Style::default().fg(Color::White)),
+            ]));
         } else if message.role == "assistant" {
-            string_message.push_str("AI: ");
-        } else {
-            continue;
+            lines.push(Line::from(vec![
+                Span::styled("AI: ", Style::default().fg(Color::Red)),
+                Span::styled(&message.content, Style::default().fg(Color::White)),
+            ]));
         }
 
-        string_message.push_str(&message.content);
-        string_message.push_str("\n\n");
+        lines.push(Line::from(vec![Span::styled("", Style::default())]));
+    }
+
+    let text = Text::from(lines);
+    let message_p = Paragraph::new(text);
+
+    if app.scroll > message_p.line_count(frame.area().width) as u16 {
+        app.scroll = message_p.line_count(frame.area().width) as u16;
     }
 
     frame.render_widget(
-        Paragraph::new(string_message)
+        message_p
             .fg(Color::White)
             .wrap(Wrap { trim: true })
-            // .scroll(offset)
+            .scroll((app.scroll, 0))
             .block(
                 Block::new()
                     .fg(Color::Blue)
@@ -74,9 +85,20 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 }
 
 pub fn screen_size_warning(frame: &mut Frame) {
-    let greeting = Paragraph::new(
-        "Terminal size is too low! Width: {}, Height: {}
-Set your terminal size to minimum Width: 80, Height: 20",
-    );
-    frame.render_widget(greeting, frame.area());
+    let lines = vec![
+        Line::from(Span::styled(
+            "Terminal size is too low! Width: {}, Height: {}",
+            Style::default(),
+        ))
+        .centered(),
+        Line::from(Span::styled(
+            "Set your terminal size to minimum Width: 80, Height: 20",
+            Style::default(),
+        ))
+        .centered(),
+    ];
+    let text = Text::from(lines);
+    let p = Paragraph::new(text);
+
+    frame.render_widget(p, frame.area());
 }

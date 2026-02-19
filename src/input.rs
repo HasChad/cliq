@@ -26,7 +26,7 @@ pub fn input_controller(event: KeyEvent, app: &mut App) {
             }
             KeyCode::Left => {}
             KeyCode::Up => {
-                if app.scroll > 0 {
+                if app.scroll > 1 {
                     app.scroll -= 1
                 }
             }
@@ -51,22 +51,22 @@ pub fn process_input(app: &mut App) {
     }
 
     match app.input.to_lowercase().as_str() {
-        "exit" | "quit" => {
+        "/exit" | "quit" => {
             app.run = false;
             return;
         }
-        "clear" => {
+        "/clear" => {
             let system_msg = app.messages[0].clone();
             app.messages = vec![system_msg];
             app.input.clear();
             return;
         }
-        "help" => {
+        "/help" => {
             app.popup = Popup::Help;
             app.input.clear();
             return;
         }
-        "status" => {
+        "/status" => {
             app.popup = Popup::Status;
             app.input.clear();
             return;

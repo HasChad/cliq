@@ -3,7 +3,7 @@ use ratatui::{
     layout::{Alignment, Constraint, Flex, Layout, Rect},
     style::{Color, Style, Stylize},
     text::{Line, Span, Text},
-    widgets::{Block, Borders, Clear, Paragraph, TitlePosition},
+    widgets::{Block, Borders, Clear, Paragraph, TitlePosition, Wrap},
 };
 
 use crate::ai_logic::Message;
@@ -21,7 +21,7 @@ pub fn popup_welcome(frame: &mut Frame) {
         ))
         .alignment(Alignment::Center),
         Line::from(Span::styled(
-            "- Type 'help' for available commands",
+            "- Type '/help' for available commands",
             Style::default().fg(Color::Blue),
         )),
         Line::from(Span::styled(
@@ -31,7 +31,7 @@ pub fn popup_welcome(frame: &mut Frame) {
     ];
     let text = Text::from(lines);
 
-    let area = popup_area(frame.area(), 60, 20);
+    let area = popup_area(frame.area(), 40, 6);
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text).block(
@@ -39,7 +39,7 @@ pub fn popup_welcome(frame: &mut Frame) {
                 .bold()
                 .fg(Color::Green)
                 .borders(Borders::ALL)
-                .title("Welcome")
+                .title("")
                 .title_position(TitlePosition::Top),
         ),
         area,
@@ -53,25 +53,25 @@ pub fn popup_help(frame: &mut Frame) {
             Style::default().fg(Color::Yellow),
         )),
         Line::from(Span::styled(
-            " exit | quit   - Quit",
-            Style::default().fg(Color::Yellow),
-        )),
-        Line::from(Span::styled(
-            " help          - Show this help message",
+            " /exit | /quit  - Quit",
             Style::default().fg(Color::Blue),
         )),
         Line::from(Span::styled(
-            " status        - Show current conversation status",
+            " /help          - Show this help message",
             Style::default().fg(Color::Blue),
         )),
         Line::from(Span::styled(
-            " clear         - Clear chat history",
+            " /status        - Show current conversation status",
+            Style::default().fg(Color::Blue),
+        )),
+        Line::from(Span::styled(
+            " /clear         - Clear chat history",
             Style::default().fg(Color::Blue),
         )),
     ];
     let text = Text::from(lines);
 
-    let area = popup_area(frame.area(), 60, 20);
+    let area = popup_area(frame.area(), 50, 7);
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text).block(
@@ -79,7 +79,7 @@ pub fn popup_help(frame: &mut Frame) {
                 .bold()
                 .fg(Color::Green)
                 .borders(Borders::ALL)
-                .title("Help")
+                .title(" Help ")
                 .title_position(TitlePosition::Top),
         ),
         area,
@@ -110,7 +110,7 @@ pub fn popup_status(frame: &mut Frame, messages: &[Message]) {
     ];
     let text = Text::from(lines);
 
-    let area = popup_area(frame.area(), 60, 20);
+    let area = popup_area(frame.area(), 35, 6);
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text).block(
@@ -118,7 +118,7 @@ pub fn popup_status(frame: &mut Frame, messages: &[Message]) {
                 .bold()
                 .fg(Color::Green)
                 .borders(Borders::ALL)
-                .title("Status")
+                .title(" Status ")
                 .title_position(TitlePosition::Top),
         ),
         area,
@@ -132,7 +132,7 @@ pub fn popup_sending_message(frame: &mut Frame) {
     ))];
     let text = Text::from(lines);
 
-    let area = popup_area(frame.area(), 60, 20);
+    let area = popup_area(frame.area(), 40, 7);
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text).block(
@@ -140,7 +140,7 @@ pub fn popup_sending_message(frame: &mut Frame) {
                 .bold()
                 .fg(Color::Green)
                 .borders(Borders::ALL)
-                .title("Info")
+                .title(" Info ")
                 .title_position(TitlePosition::Top),
         ),
         area,
@@ -154,24 +154,24 @@ pub fn popup_error(frame: &mut Frame, error_msg: &str) {
     ))];
     let text = Text::from(lines);
 
-    let area = popup_area(frame.area(), 60, 20);
+    let area = popup_area(frame.area(), 40, 7);
     frame.render_widget(Clear, area);
     frame.render_widget(
-        Paragraph::new(text).block(
+        Paragraph::new(text).wrap(Wrap { trim: true }).block(
             Block::new()
                 .bold()
                 .fg(Color::Green)
                 .borders(Borders::ALL)
-                .title("Error")
+                .title(" Error ")
                 .title_position(TitlePosition::Top),
         ),
         area,
     );
 }
 
-fn popup_area(area: Rect, percent_x: u16, percent_y: u16) -> Rect {
-    let vertical = Layout::vertical([Constraint::Percentage(percent_y)]).flex(Flex::Center);
-    let horizontal = Layout::horizontal([Constraint::Percentage(percent_x)]).flex(Flex::Center);
+fn popup_area(area: Rect, length_x: u16, length_y: u16) -> Rect {
+    let vertical = Layout::vertical([Constraint::Length(length_y)]).flex(Flex::Center);
+    let horizontal = Layout::horizontal([Constraint::Length(length_x)]).flex(Flex::Center);
     let [area] = vertical.areas(area);
     let [area] = horizontal.areas(area);
     area

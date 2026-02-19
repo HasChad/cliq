@@ -25,7 +25,7 @@ pub struct App {
     pub client: Client,
     pub input: String,
     pub popup: Popup,
-    pub scroll: u32,
+    pub scroll: u16,
 }
 
 impl App {
@@ -69,7 +69,7 @@ impl App {
             client: Client::new(),
             input: String::new(),
             popup: Popup::Welcome,
-            scroll: 0,
+            scroll: 1,
         }
     }
 }
