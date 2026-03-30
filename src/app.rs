@@ -1,3 +1,4 @@
+use dotenvy::dotenv;
 use reqwest::blocking::Client;
 use std::{
     env,
@@ -29,7 +30,8 @@ pub struct App {
 }
 
 impl App {
-    pub fn init() -> Self {
+    pub fn new() -> Self {
+        dotenv().ok();
         let system_message = Message::ai_character();
         let api_key = match env::var("GROQ_API_KEY") {
             Ok(env) => env,
@@ -68,7 +70,7 @@ impl App {
             api_key,
             client: Client::new(),
             input: String::new(),
-            popup: Popup::Welcome,
+            popup: Popup::None,
             scroll: 1,
         }
     }

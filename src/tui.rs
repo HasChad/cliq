@@ -1,6 +1,6 @@
 use ratatui::{
     Frame,
-    layout::{Alignment, Constraint, Direction, Layout, VerticalAlignment},
+    layout::{Constraint, Direction, Layout},
     style::{Color, Style, Stylize},
     text::{Line, Span, Text},
     widgets::{Block, BorderType, Borders, Paragraph, TitlePosition, Wrap},
@@ -36,9 +36,10 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let text = Text::from(lines);
     let message_p = Paragraph::new(text);
 
-    if app.scroll > message_p.line_count(frame.area().width) as u16 {
-        app.scroll = message_p.line_count(frame.area().width) as u16;
-    }
+    let total_lines = message_p.line_count(outer_layout[0].width) as u16;
+    let max = total_lines.saturating_sub(outer_layout[0].height);
+
+    app.scroll = (app.scroll + 1).min(max);
 
     frame.render_widget(
         message_p
@@ -86,16 +87,23 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
 pub fn screen_size_warning(frame: &mut Frame) {
     let lines = vec![
+        Line::from(Span::styled("Terminal size too small! ", Style::default())).centered(),
         Line::from(Span::styled(
-            "Terminal size is too low! Width: {}, Height: {}",
+            format!(
+                "Width: {}, Height: {}",
+                frame.area().width,
+                frame.area().height
+            ),
             Style::default(),
         ))
         .centered(),
+        Line::from(Span::styled("", Style::default())),
         Line::from(Span::styled(
-            "Set your terminal size to minimum Width: 80, Height: 20",
+            "Set your terminal size to minimum",
             Style::default(),
         ))
         .centered(),
+        Line::from(Span::styled("Width: 80, Height: 20", Style::default())).centered(),
     ];
     let text = Text::from(lines);
     let p = Paragraph::new(text);

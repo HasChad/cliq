@@ -9,19 +9,18 @@ use input::*;
 use tui::*;
 
 use color_eyre::{Result, eyre::Context};
-use dotenvy::dotenv;
 use ratatui::{
     DefaultTerminal,
     crossterm::event::{Event, read},
 };
 
 fn main() -> Result<()> {
-    dotenv().ok();
-    let mut app = App::init();
-
     color_eyre::install()?;
+    let mut app = App::new();
     let terminal = ratatui::init();
-    let app_result = run(&mut app, terminal).context("app loop failed");
+
+    let app_result = run(&mut app, terminal).context("App loop failed");
+
     ratatui::restore();
     app_result
 }
