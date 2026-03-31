@@ -71,7 +71,7 @@ pub fn popup_help(frame: &mut Frame) {
     ];
     let text = Text::from(lines);
 
-    let area = popup_area(frame.area(), 50, 7);
+    let area = popup_area(frame.area(), 52, 7);
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text).block(

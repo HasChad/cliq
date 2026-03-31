@@ -17,7 +17,7 @@ pub fn input_controller(event: KeyEvent, app: &mut App) {
         }
     } else {
         match event.code {
-            KeyCode::Char(c) => app.input.push(c),
+            KeyCode::Char(char) => app.input.push(char),
             KeyCode::Enter => process_input(app),
             KeyCode::Backspace => {
                 if app.input.len() != 0 {
@@ -73,6 +73,8 @@ pub fn process_input(app: &mut App) {
         }
         _ => {}
     }
+
+    
 
     app.messages.push(Message::user_input(app.input.clone()));
 

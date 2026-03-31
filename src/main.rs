@@ -11,7 +11,7 @@ use tui::*;
 use color_eyre::{Result, eyre::Context};
 use ratatui::{
     DefaultTerminal,
-    crossterm::event::{Event, read},
+    crossterm::event::{Event, KeyCode, read},
 };
 
 fn main() -> Result<()> {
@@ -29,6 +29,15 @@ fn run(mut app: &mut App, mut terminal: DefaultTerminal) -> Result<()> {
     while app.run {
         if terminal.get_frame().area().width < 80 || terminal.get_frame().area().height < 20 {
             terminal.draw(screen_size_warning)?;
+
+            match read().unwrap() {
+                Event::Key(event) => {
+                    if event.code == KeyCode::Esc {
+                        app.run = false;
+                    }
+                }
+                _ => (),
+            }
         } else {
             terminal.draw(|frame| render(&mut app, frame))?;
 
