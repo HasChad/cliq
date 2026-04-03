@@ -127,20 +127,20 @@ pub fn popup_status(frame: &mut Frame, messages: &[Message]) {
 
 pub fn popup_sending_message(frame: &mut Frame) {
     let lines = vec![Line::from(Span::styled(
-        "Sending message...",
+        " Sending message...",
         Style::default().fg(Color::Yellow),
     ))];
     let text = Text::from(lines);
 
-    let area = popup_area(frame.area(), 40, 7);
+    let area = popup_area(frame.area(), 22, 3);
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text).block(
             Block::new()
                 .bold()
-                .fg(Color::Green)
+                .fg(Color::Blue)
                 .borders(Borders::ALL)
-                .title(" Info ")
+                .title("")
                 .title_position(TitlePosition::Top),
         ),
         area,
@@ -150,25 +150,26 @@ pub fn popup_sending_message(frame: &mut Frame) {
 pub fn popup_quit(frame: &mut Frame) {
     let lines = vec![
         Line::from(Span::styled(
-            "Are you sure want to quit?",
+            " Are you sure want to quit?",
             Style::default().fg(Color::Yellow),
         )),
+        Line::from(Span::styled("", Style::default())),
         Line::from(Span::styled(
-            "    Q: Quit       N: No",
+            "         ESC: Quit",
             Style::default().fg(Color::Blue),
         )),
     ];
     let text = Text::from(lines);
 
-    let area = popup_area(frame.area(), 29, 4);
+    let area = popup_area(frame.area(), 30, 5);
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text).block(
             Block::new()
                 .bold()
-                .fg(Color::Green)
+                .fg(Color::LightRed)
                 .borders(Borders::ALL)
-                .title(" Quit ")
+                .title("")
                 .title_position(TitlePosition::Top),
         ),
         area,

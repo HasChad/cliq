@@ -16,6 +16,7 @@ pub enum Popup {
     Welcome,
     Help,
     Status,
+    SendingMessage,
     Quit,
     Error(String),
 }
@@ -28,6 +29,7 @@ pub struct App {
     pub input: String,
     pub popup: Popup,
     pub scroll: u16,
+    pub should_send_message: bool,
 }
 
 impl App {
@@ -71,8 +73,9 @@ impl App {
             api_key,
             client: Client::new(),
             input: String::new(),
-            popup: Popup::None,
+            popup: Popup::Welcome,
             scroll: 0,
+            should_send_message: false,
         }
     }
 }

@@ -13,7 +13,7 @@ pub const MAX_INPUT_LENGTH: usize = 1000;
 pub fn input_controller(event: KeyEvent, app: &mut App) {
     if app.popup != Popup::None {
         if app.popup == Popup::Quit {
-            if event.code == KeyCode::Char('q') {
+            if event.code == KeyCode::Esc {
                 app.run = false;
             } else {
                 app.popup = Popup::None
@@ -81,9 +81,16 @@ pub fn process_input(app: &mut App) {
         _ => {}
     }
 
-    app.messages.push(Message::user_input(app.input.clone()));
+    app.should_send_message = true;
+    app.popup = Popup::SendingMessage;
+}
 
+pub fn send_message(app: &mut App) {
+    app.messages.push(Message::user_input(app.input.clone()));
     app.input.clear();
+    app.should_send_message = false;
+    app.popup = Popup::None;
+
     manage_history(&mut app.messages);
 
     match send_chat_request(app) {

@@ -40,10 +40,13 @@ fn run(mut app: &mut App, mut terminal: DefaultTerminal) -> Result<()> {
             }
         } else {
             terminal.draw(|frame| render(&mut app, frame))?;
-
-            match read().unwrap() {
-                Event::Key(event) => input_controller(event, &mut app),
-                _ => (),
+            if app.should_send_message {
+                send_message(app);
+            } else {
+                match read().unwrap() {
+                    Event::Key(event) => input_controller(event, &mut app),
+                    _ => (),
+                }
             }
         }
     }
