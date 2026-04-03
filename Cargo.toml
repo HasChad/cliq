@@ -10,3 +10,4 @@ dotenvy = "0.15"
 serde_json = "1.0.145"
 ratatui = { version = "0.30.0", features = ["unstable-rendered-line-info"] }
 color-eyre = "0.6.5"
+textwrap = "0.16.2"

@@ -12,6 +12,13 @@ pub const MAX_INPUT_LENGTH: usize = 1000;
 
 pub fn input_controller(event: KeyEvent, app: &mut App) {
     if app.popup != Popup::None {
+        if app.popup == Popup::Quit {
+            if event.code == KeyCode::Char('q') {
+                app.run = false;
+            } else {
+                app.popup = Popup::None
+            }
+        }
         if event.code == KeyCode::Char('q') {
             app.popup = Popup::None;
         }
@@ -26,12 +33,12 @@ pub fn input_controller(event: KeyEvent, app: &mut App) {
             }
             KeyCode::Left => {}
             KeyCode::Up => {
-                if app.scroll > 1 {
+                if app.scroll > 0 {
                     app.scroll -= 1
                 }
             }
             KeyCode::Down => app.scroll += 1,
-            KeyCode::Esc => app.run = false,
+            KeyCode::Esc => app.popup = Popup::Quit,
             _ => (),
         }
     }
@@ -73,8 +80,6 @@ pub fn process_input(app: &mut App) {
         }
         _ => {}
     }
-
-    
 
     app.messages.push(Message::user_input(app.input.clone()));
 

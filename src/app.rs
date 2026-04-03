@@ -16,6 +16,7 @@ pub enum Popup {
     Welcome,
     Help,
     Status,
+    Quit,
     Error(String),
 }
 
@@ -71,7 +72,7 @@ impl App {
             client: Client::new(),
             input: String::new(),
             popup: Popup::None,
-            scroll: 1,
+            scroll: 0,
         }
     }
 }

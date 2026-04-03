@@ -147,6 +147,34 @@ pub fn popup_sending_message(frame: &mut Frame) {
     );
 }
 
+pub fn popup_quit(frame: &mut Frame) {
+    let lines = vec![
+        Line::from(Span::styled(
+            "Are you sure want to quit?",
+            Style::default().fg(Color::Yellow),
+        )),
+        Line::from(Span::styled(
+            "    Q: Quit       N: No",
+            Style::default().fg(Color::Blue),
+        )),
+    ];
+    let text = Text::from(lines);
+
+    let area = popup_area(frame.area(), 29, 4);
+    frame.render_widget(Clear, area);
+    frame.render_widget(
+        Paragraph::new(text).block(
+            Block::new()
+                .bold()
+                .fg(Color::Green)
+                .borders(Borders::ALL)
+                .title(" Quit ")
+                .title_position(TitlePosition::Top),
+        ),
+        area,
+    );
+}
+
 pub fn popup_error(frame: &mut Frame, error_msg: &str) {
     let lines = vec![Line::from(Span::styled(
         error_msg,
