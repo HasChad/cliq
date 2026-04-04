@@ -24,7 +24,7 @@ pub fn input_controller(event: KeyEvent, app: &mut App) {
         }
     } else {
         match event.code {
-            KeyCode::Char(char) => app.input.push(char),
+            KeyCode::Char(char) => push_char(app, char),
             KeyCode::Enter => process_input(app),
             KeyCode::Backspace => {
                 if app.input.len() != 0 {
@@ -32,6 +32,7 @@ pub fn input_controller(event: KeyEvent, app: &mut App) {
                 }
             }
             KeyCode::Left => {}
+            KeyCode::Right => {}
             KeyCode::Up => {
                 if app.scroll > 0 {
                     app.scroll -= 1
@@ -44,7 +45,16 @@ pub fn input_controller(event: KeyEvent, app: &mut App) {
     }
 }
 
-pub fn process_input(app: &mut App) {
+fn push_char(app: &mut App, char: char) {
+    app.input.push(char);
+
+    app.input = app.input.trim_start().to_string();
+}
+
+fn process_input(app: &mut App) {
+    app.input = app.input.trim_end().to_string();
+    app.input = app.input.trim_start().to_string();
+
     if app.input.is_empty() {
         return;
     }
@@ -58,7 +68,7 @@ pub fn process_input(app: &mut App) {
     }
 
     match app.input.to_lowercase().as_str() {
-        "/exit" | "quit" => {
+        "/exit" | "/quit" => {
             app.run = false;
             return;
         }

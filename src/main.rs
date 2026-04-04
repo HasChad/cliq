@@ -40,6 +40,7 @@ fn run(mut app: &mut App, mut terminal: DefaultTerminal) -> Result<()> {
             }
         } else {
             terminal.draw(|frame| render(&mut app, frame))?;
+
             if app.should_send_message {
                 send_message(app);
             } else {
