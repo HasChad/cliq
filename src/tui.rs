@@ -28,7 +28,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         if message.role == "user" {
             lines.push(Line::from(vec![Span::styled(
                 "━ You ━",
-                Style::default().fg(Color::Blue),
+                Style::default().fg(app.colors.user_color),
             )]));
 
             for text in wrapped_text.iter() {
@@ -41,7 +41,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         } else if message.role == "assistant" {
             lines.push(Line::from(vec![Span::styled(
                 "━ AI ━",
-                Style::default().fg(Color::Red),
+                Style::default().fg(app.colors.ai_color),
             )]));
 
             for text in wrapped_text.iter() {
@@ -66,7 +66,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     frame.render_widget(
         message_p.fg(Color::White).scroll((app.scroll, 0)).block(
             Block::new()
-                .fg(Color::Blue)
+                .fg(app.colors.chat_color)
                 .borders(Borders::ALL)
                 .border_type(BorderType::Thick)
                 .title(" Chat ")
@@ -78,7 +78,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     frame.render_widget(
         Paragraph::new(app.input.clone()).fg(Color::White).block(
             Block::new()
-                .fg(Color::Green)
+                .fg(app.colors.message_color)
                 .borders(Borders::ALL)
                 .border_type(BorderType::Thick)
                 .title(format!(

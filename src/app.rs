@@ -1,4 +1,5 @@
 use dotenvy::dotenv;
+use ratatui::style::Color;
 use reqwest::blocking::Client;
 use std::{
     env,
@@ -21,6 +22,25 @@ pub enum Popup {
     Error(String),
 }
 
+#[derive(PartialEq)]
+pub struct ThemeColors {
+    pub chat_color: Color,
+    pub message_color: Color,
+    pub user_color: Color,
+    pub ai_color: Color,
+}
+
+impl ThemeColors {
+    fn new() -> Self {
+        Self {
+            chat_color: Color::Blue,
+            message_color: Color::Green,
+            user_color: Color::Blue,
+            ai_color: Color::Red,
+        }
+    }
+}
+
 pub struct App {
     pub run: bool,
     pub messages: Vec<Message>,
@@ -28,6 +48,7 @@ pub struct App {
     pub client: Client,
     pub input: String,
     pub popup: Popup,
+    pub colors: ThemeColors,
     pub scroll: u16,
     pub should_send_message: bool,
 }
@@ -74,6 +95,7 @@ impl App {
             client: Client::new(),
             input: String::new(),
             popup: Popup::Welcome,
+            colors: ThemeColors::new(),
             scroll: 0,
             should_send_message: false,
         }

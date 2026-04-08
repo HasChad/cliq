@@ -2,6 +2,8 @@
 # If it's invalid or deprecated, LLaMA 3.1 8B will be used as a fallback.
 # Don’t forget: these keys must be added to your .env file.
 
-AI_MODEL=llama-3.1-8b-instant
+AI_MODEL=llama-3.3-70b-versatile
 
 GROQ_API_KEY=your_api_key
+
+AI_PERSONALITY="your ai personality"
