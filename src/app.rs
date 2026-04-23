@@ -50,6 +50,7 @@ pub struct App {
     pub popup: Popup,
     pub colors: ThemeColors,
     pub scroll: u16,
+    pub max_scroll: u16,
     pub should_send_message: bool,
 }
 
@@ -97,6 +98,7 @@ impl App {
             popup: Popup::Welcome,
             colors: ThemeColors::new(),
             scroll: 0,
+            max_scroll: 0,
             should_send_message: false,
         }
     }

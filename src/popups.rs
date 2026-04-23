@@ -8,6 +8,14 @@ use ratatui::{
 
 use crate::ai_logic::Message;
 
+fn popup_area(area: Rect, length_x: u16, length_y: u16) -> Rect {
+    let vertical = Layout::vertical([Constraint::Length(length_y)]).flex(Flex::Center);
+    let horizontal = Layout::horizontal([Constraint::Length(length_x)]).flex(Flex::Center);
+    let [area] = vertical.areas(area);
+    let [area] = horizontal.areas(area);
+    area
+}
+
 pub fn popup_welcome(frame: &mut Frame) {
     let lines = vec![
         Line::from(Span::styled(
@@ -196,12 +204,4 @@ pub fn popup_error(frame: &mut Frame, error_msg: &str) {
         ),
         area,
     );
-}
-
-fn popup_area(area: Rect, length_x: u16, length_y: u16) -> Rect {
-    let vertical = Layout::vertical([Constraint::Length(length_y)]).flex(Flex::Center);
-    let horizontal = Layout::horizontal([Constraint::Length(length_x)]).flex(Flex::Center);
-    let [area] = vertical.areas(area);
-    let [area] = horizontal.areas(area);
-    area
 }

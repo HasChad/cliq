@@ -38,7 +38,10 @@ pub fn input_controller(event: KeyEvent, app: &mut App) {
                     app.scroll -= 1
                 }
             }
-            KeyCode::Down => app.scroll += 1,
+            KeyCode::Down => {
+                app.scroll += 1;
+                app.scroll = (app.scroll).min(app.max_scroll);
+            }
             KeyCode::Esc => app.popup = Popup::Quit,
             _ => (),
         }

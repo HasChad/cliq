@@ -59,9 +59,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let text = Text::from(lines);
     let message_p = Paragraph::new(text);
 
-    let max = total_lines.saturating_sub(outer_layout[0].height - 2);
-
-    app.scroll = (app.scroll).min(max);
+    app.max_scroll = total_lines.saturating_sub(outer_layout[0].height - 2);
 
     frame.render_widget(
         message_p.fg(Color::White).scroll((app.scroll, 0)).block(
