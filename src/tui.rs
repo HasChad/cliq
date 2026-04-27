@@ -5,6 +5,7 @@ use ratatui::{
     text::{Line, Span, Text},
     widgets::{Block, BorderType, Borders, Paragraph, TitlePosition},
 };
+use ratatui_textarea::WrapMode;
 
 use crate::{App, Popup, input::MAX_INPUT_LENGTH, popups::*};
 
@@ -26,29 +27,17 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         let wrapped_text = textwrap::wrap(&message.content, frame.area().width as usize - 2);
 
         if message.role == "user" {
-            lines.push(Line::from(vec![Span::styled(
-                "━ You ━",
-                Style::default().fg(app.colors.user_color),
-            )]));
+            lines.push(Line::default().spans(["━ You ━"]).fg(app.colors.user_color));
 
             for text in wrapped_text.iter() {
-                lines.push(Line::from(vec![Span::styled(
-                    text.clone(),
-                    Style::default().fg(Color::White),
-                )]));
+                lines.push(Line::default().spans([text.clone()]));
             }
             total_lines += wrapped_text.len() as u16 + 2
         } else if message.role == "assistant" {
-            lines.push(Line::from(vec![Span::styled(
-                "━ AI ━",
-                Style::default().fg(app.colors.ai_color),
-            )]));
+            lines.push(Line::default().spans(["━ AI ━"]).fg(app.colors.ai_color));
 
             for text in wrapped_text.iter() {
-                lines.push(Line::from(vec![Span::styled(
-                    text.clone(),
-                    Style::default().fg(Color::White),
-                )]));
+                lines.push(Line::default().spans([text.clone()]));
             }
             total_lines += wrapped_text.len() as u16 + 2
         }
@@ -73,21 +62,22 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         outer_layout[0],
     );
 
-    frame.render_widget(
-        Paragraph::new(app.input.clone()).fg(Color::White).block(
-            Block::new()
-                .fg(app.colors.message_color)
-                .borders(Borders::ALL)
-                .border_type(BorderType::Thick)
-                .title(format!(
-                    " Message | {}/{} ",
-                    app.input.len(),
-                    MAX_INPUT_LENGTH,
-                ))
-                .title_position(TitlePosition::Top),
-        ),
-        outer_layout[1],
+    app.textarea.set_block(
+        Block::new()
+            .fg(app.colors.message_color)
+            .borders(Borders::ALL)
+            .border_type(BorderType::Thick)
+            .title(format!(
+                " Message | {}/{} ",
+                app.textarea.lines().join("\n").len(),
+                MAX_INPUT_LENGTH,
+            ))
+            .title_position(TitlePosition::Top),
     );
+    app.textarea.set_style(Style::default().fg(Color::White));
+    app.textarea.set_wrap_mode(WrapMode::Word);
+    app.textarea.set_cursor_line_style(Style::default());
+    frame.render_widget(&app.textarea, outer_layout[1]);
 
     match &app.popup {
         Popup::Welcome => popup_welcome(frame),
@@ -102,26 +92,19 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
 pub fn screen_size_warning(frame: &mut Frame) {
     let lines = vec![
-        Line::from(Span::styled("Terminal size too small! ", Style::default())).centered(),
-        Line::from(Span::styled(
-            format!(
-                "Width: {}, Height: {}",
-                frame.area().width,
-                frame.area().height
-            ),
-            Style::default(),
-        ))
-        .centered(),
-        Line::from(Span::styled("", Style::default())),
-        Line::from(Span::styled(
-            "Set your terminal size to minimum",
-            Style::default(),
-        ))
-        .centered(),
-        Line::from(Span::styled("Width: 80, Height: 20", Style::default())).centered(),
+        Line::default().spans(["Terminal size too small! "]),
+        Line::default().spans([format!(
+            "Width: {}, Height: {}",
+            frame.area().width,
+            frame.area().height
+        )]),
+        Line::default(),
+        Line::default().spans(["Set your terminal size to minimum"]),
+        Line::default().spans(["Width: 80, Height: 20"]),
     ];
+
     let text = Text::from(lines);
-    let p = Paragraph::new(text);
+    let p = Paragraph::new(text).centered();
 
     frame.render_widget(p, frame.area());
 }

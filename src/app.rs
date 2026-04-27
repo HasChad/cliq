@@ -1,5 +1,6 @@
 use dotenvy::dotenv;
 use ratatui::style::Color;
+use ratatui_textarea::TextArea;
 use reqwest::blocking::Client;
 use std::{
     env,
@@ -22,7 +23,7 @@ pub enum Popup {
     Error(String),
 }
 
-#[derive(PartialEq)]
+// #[derive(PartialEq, Serialize, Deserialize, Default)]
 pub struct ThemeColors {
     pub chat_color: Color,
     pub message_color: Color,
@@ -41,20 +42,20 @@ impl ThemeColors {
     }
 }
 
-pub struct App {
+pub struct App<'a> {
     pub run: bool,
     pub messages: Vec<Message>,
     pub api_key: String,
     pub client: Client,
-    pub input: String,
     pub popup: Popup,
     pub colors: ThemeColors,
     pub scroll: u16,
     pub max_scroll: u16,
     pub should_send_message: bool,
+    pub textarea: TextArea<'a>,
 }
 
-impl App {
+impl<'a> App<'a> {
     pub fn new() -> Self {
         dotenv().ok();
         let system_message = Message::ai_character();
@@ -94,12 +95,12 @@ impl App {
             messages,
             api_key,
             client: Client::new(),
-            input: String::new(),
             popup: Popup::Welcome,
             colors: ThemeColors::new(),
             scroll: 0,
             max_scroll: 0,
             should_send_message: false,
+            textarea: TextArea::default(),
         }
     }
 }

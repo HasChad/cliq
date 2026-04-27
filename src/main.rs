@@ -44,7 +44,7 @@ fn run(mut app: &mut App, mut terminal: DefaultTerminal) -> Result<()> {
             if app.should_send_message {
                 send_message(app);
             } else {
-                match read().unwrap() {
+                match read()? {
                     Event::Key(event) => input_controller(event, &mut app),
                     _ => (),
                 }

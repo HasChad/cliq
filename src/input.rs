@@ -1,6 +1,7 @@
 use std::fs;
 
-use ratatui::crossterm::event::{KeyCode, KeyEvent};
+use ratatui::crossterm::event::KeyEvent;
+use ratatui_textarea::{Input, Key};
 
 use crate::{
     App, Popup,
@@ -10,59 +11,57 @@ use crate::{
 
 pub const MAX_INPUT_LENGTH: usize = 1000;
 
-pub fn input_controller(event: KeyEvent, app: &mut App) {
+pub fn input_controller(key: KeyEvent, app: &mut App) {
+    let input = Input::from(key);
+
     if app.popup != Popup::None {
         if app.popup == Popup::Quit {
-            if event.code == KeyCode::Esc {
+            if input.key == Key::Esc {
                 app.run = false;
             } else {
                 app.popup = Popup::None
             }
         }
-        if event.code == KeyCode::Char('q') {
+        if input.key == Key::Char('q') {
             app.popup = Popup::None;
         }
     } else {
-        match event.code {
-            KeyCode::Char(char) => push_char(app, char),
-            KeyCode::Enter => process_input(app),
-            KeyCode::Backspace => {
-                if app.input.len() != 0 {
-                    app.input.pop();
-                }
-            }
-            KeyCode::Left => {}
-            KeyCode::Right => {}
-            KeyCode::Up => {
+        match input {
+            Input {
+                key: Key::Enter,
+                shift: true,
+                ..
+            } => app.textarea.insert_newline(),
+            Input { key: Key::Esc, .. } => app.popup = Popup::Quit,
+            Input {
+                key: Key::Enter, ..
+            } => process_input(app),
+            Input { key: Key::Up, .. } => {
                 if app.scroll > 0 {
                     app.scroll -= 1
                 }
             }
-            KeyCode::Down => {
+            Input { key: Key::Down, .. } => {
                 app.scroll += 1;
                 app.scroll = (app.scroll).min(app.max_scroll);
             }
-            KeyCode::Esc => app.popup = Popup::Quit,
-            _ => (),
+            input => {
+                app.textarea.input(input);
+            }
         }
     }
 }
 
-fn push_char(app: &mut App, char: char) {
-    app.input.push(char);
-
-    app.input = app.input.trim_start().to_string();
-}
-
 fn process_input(app: &mut App) {
-    app.input = app.input.trim_end().to_string();
-    app.input = app.input.trim_start().to_string();
+    let mut message: String = app.textarea.lines().join("\n");
 
-    if app.input.is_empty() {
+    message = message.trim_end().trim_start().to_string();
+
+    if message.is_empty() {
         return;
     }
 
-    if app.input.len() > MAX_INPUT_LENGTH {
+    if message.len() > MAX_INPUT_LENGTH {
         app.popup = Popup::Error(format!(
             "Input too long (max {} characters)",
             MAX_INPUT_LENGTH
@@ -70,7 +69,7 @@ fn process_input(app: &mut App) {
         return;
     }
 
-    match app.input.to_lowercase().as_str() {
+    match message.to_lowercase().as_str() {
         "/exit" | "/quit" => {
             app.run = false;
             return;
@@ -78,17 +77,17 @@ fn process_input(app: &mut App) {
         "/clear" => {
             let system_msg = app.messages[0].clone();
             app.messages = vec![system_msg];
-            app.input.clear();
+            app.textarea.clear();
             return;
         }
         "/help" => {
             app.popup = Popup::Help;
-            app.input.clear();
+            app.textarea.clear();
             return;
         }
         "/status" => {
             app.popup = Popup::Status;
-            app.input.clear();
+            app.textarea.clear();
             return;
         }
         _ => {}
@@ -99,8 +98,10 @@ fn process_input(app: &mut App) {
 }
 
 pub fn send_message(app: &mut App) {
-    app.messages.push(Message::user_input(app.input.clone()));
-    app.input.clear();
+    let message: String = app.textarea.lines().join("\n");
+    app.textarea.clear();
+
+    app.messages.push(Message::user_input(message));
     app.should_send_message = false;
     app.popup = Popup::None;
 
