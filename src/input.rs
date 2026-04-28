@@ -98,7 +98,7 @@ fn process_input(app: &mut App) {
 }
 
 pub fn send_message(app: &mut App) {
-    let message: String = app.textarea.lines().join("\n");
+    let message: String = app.textarea.lines().join(" ");
     app.textarea.clear();
 
     app.messages.push(Message::user_input(message));
@@ -114,13 +114,8 @@ pub fn send_message(app: &mut App) {
             let json_string = serde_json::to_string(&app.messages).unwrap();
             fs::write(FILE_PATH, json_string).unwrap();
         }
-        Err(ChatError::EnvVar) => app.popup = Popup::Error("Please check your AI model".into()),
-        Err(ChatError::Network) => {
-            app.popup = Popup::Error("Network error: Please check your internet connection.".into())
-        }
-        Err(ChatError::ApiResponse) => {
-            app.popup = Popup::Error("API error: Please check your API key and try again.".into())
-        }
-        Err(_) => app.popup = Popup::Error("Unexpected error.".into()),
+        Err(ChatError::EnvVar(err_msg)) => app.popup = Popup::Error(err_msg),
+        Err(ChatError::Network(err_msg)) => app.popup = Popup::Error(err_msg),
+        Err(ChatError::ApiResponse(err_msg)) => app.popup = Popup::Error(err_msg),
     }
 }

@@ -1,6 +1,6 @@
 use ratatui::{
     Frame,
-    layout::{Alignment, Constraint, Flex, Layout, Rect},
+    layout::{Constraint, Flex, Layout, Rect},
     style::{Color, Stylize},
     text::{Line, Text},
     widgets::{Block, Borders, Clear, Paragraph, Wrap},
@@ -21,11 +21,11 @@ pub fn popup_welcome(frame: &mut Frame) {
         Line::default()
             .spans(["Welcome to Cliq"])
             .fg(Color::Yellow)
-            .alignment(Alignment::Center),
+            .centered(),
         Line::default()
             .spans(["────────────────────────────────────"])
             .fg(Color::Yellow)
-            .alignment(Alignment::Center),
+            .centered(),
         Line::default()
             .spans(["- Type '/help' for available commands"])
             .fg(Color::Blue),
@@ -49,11 +49,11 @@ pub fn popup_help(frame: &mut Frame) {
         Line::default()
             .spans(["Available Commands"])
             .fg(Color::Yellow)
-            .alignment(Alignment::Center),
+            .centered(),
         Line::default()
             .spans(["────────────────────"])
             .fg(Color::Yellow)
-            .alignment(Alignment::Center),
+            .centered(),
         Line::default()
             .spans(["/exit | /quit  - Quit"])
             .fg(Color::Blue),
@@ -92,11 +92,11 @@ pub fn popup_status(frame: &mut Frame, messages: &[Message]) {
         Line::default()
             .spans(["Conversation Status"])
             .fg(Color::Yellow)
-            .alignment(Alignment::Center),
+            .centered(),
         Line::default()
             .spans(["────────────────────"])
             .fg(Color::Yellow)
-            .alignment(Alignment::Center),
+            .centered(),
         Line::default()
             .spans([format!("- Messages in history: {}", messages.len() - 1,)])
             .fg(Color::Blue),
@@ -144,12 +144,12 @@ pub fn popup_quit(frame: &mut Frame) {
         Line::default()
             .spans(["Are you sure want to quit?"])
             .fg(Color::Yellow)
-            .alignment(Alignment::Center),
+            .centered(),
         Line::default(),
         Line::default()
             .spans(["ESC: Quit"])
             .fg(Color::Blue)
-            .alignment(Alignment::Center),
+            .centered(),
     ];
 
     let text = Text::from(lines);
@@ -163,11 +163,14 @@ pub fn popup_quit(frame: &mut Frame) {
 }
 
 pub fn popup_error(frame: &mut Frame, error_msg: &str) {
-    let line = Line::default().spans([error_msg]).fg(Color::Yellow);
+    let line = Line::default()
+        .spans([error_msg])
+        .fg(Color::Yellow)
+        .centered();
 
     let text = Text::from(line);
 
-    let area = popup_area(frame.area(), 40, 7);
+    let area = popup_area(frame.area(), error_msg.len() as u16 + 4, 3);
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text).wrap(Wrap { trim: true }).block(
