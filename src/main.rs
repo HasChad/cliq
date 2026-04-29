@@ -1,3 +1,9 @@
+use color_eyre::{Result, eyre::Context};
+use ratatui::{
+    DefaultTerminal,
+    crossterm::event::{Event, KeyCode, read},
+};
+
 mod ai_logic;
 mod app;
 mod input;
@@ -7,12 +13,6 @@ mod tui;
 use app::*;
 use input::*;
 use tui::*;
-
-use color_eyre::{Result, eyre::Context};
-use ratatui::{
-    DefaultTerminal,
-    crossterm::event::{Event, KeyCode, read},
-};
 
 fn main() -> Result<()> {
     color_eyre::install()?;

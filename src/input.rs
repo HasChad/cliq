@@ -1,7 +1,6 @@
-use std::fs;
-
 use ratatui::crossterm::event::KeyEvent;
 use ratatui_textarea::{Input, Key};
+use std::fs;
 
 use crate::{
     App, Popup,
