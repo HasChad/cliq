@@ -1,5 +1,9 @@
 use dotenvy::dotenv;
-use ratatui::style::Color;
+use ratatui::{
+    style::Stylize,
+    text::{Line, Text},
+    widgets::Paragraph,
+};
 use ratatui_textarea::TextArea;
 use reqwest::blocking::Client;
 use std::{
@@ -8,7 +12,7 @@ use std::{
     process,
 };
 
-use crate::ai_logic::Message;
+use crate::{ai_logic::Message, settings::Settings};
 
 pub const FILE_PATH: &str = "messages.json";
 
@@ -23,36 +27,21 @@ pub enum Popup {
     Error(String),
 }
 
-// #[derive(PartialEq, Serialize, Deserialize, Default)]
-pub struct ThemeColors {
-    pub chat_color: Color,
-    pub message_color: Color,
-    pub user_color: Color,
-    pub ai_color: Color,
-}
-
-impl ThemeColors {
-    fn new() -> Self {
-        Self {
-            chat_color: Color::Blue,
-            message_color: Color::Green,
-            user_color: Color::Blue,
-            ai_color: Color::Red,
-        }
-    }
-}
-
 pub struct App<'a> {
     pub run: bool,
+    pub textarea: TextArea<'a>,
     pub messages: Vec<Message>,
+    pub wrapped_msg: Paragraph<'a>,
     pub api_key: String,
     pub client: Client,
     pub popup: Popup,
-    pub colors: ThemeColors,
+    pub settings: Settings,
     pub scroll: u16,
     pub max_scroll: u16,
     pub should_send_message: bool,
-    pub textarea: TextArea<'a>,
+    pub w_size: usize,
+    pub top_h_size: usize,
+    pub bottom_h_size: usize,
 }
 
 impl<'a> App<'a> {
@@ -90,17 +79,64 @@ impl<'a> App<'a> {
             }
         };
 
+        let settings = Settings::new();
+        let popup = if settings.show_welcome {
+            Popup::Welcome
+        } else {
+            Popup::None
+        };
+
         Self {
             run: true,
+            textarea: TextArea::default(),
             messages,
+            wrapped_msg: Paragraph::new(""),
             api_key,
             client: Client::new(),
-            popup: Popup::Welcome,
-            colors: ThemeColors::new(),
+            popup,
+            settings,
             scroll: 0,
             max_scroll: 0,
             should_send_message: false,
-            textarea: TextArea::default(),
+            w_size: 0,
+            top_h_size: 0,
+            bottom_h_size: 0,
         }
+    }
+
+    pub fn text_wrapper(&mut self) {
+        let mut lines = vec![];
+        let mut wrapped_message: Vec<String> = vec![];
+
+        for message in self.messages.iter() {
+            if message.role == "system" {
+                continue;
+            }
+
+            wrapped_message = textwrap::wrap(&message.content, self.w_size)
+                .into_iter()
+                .map(|s| s.into_owned())
+                .collect();
+
+            if message.role == "user" {
+                lines.push(Line::default().spans(["━ You ━".fg(self.settings.colors.user_color)]));
+            } else if message.role == "assistant" {
+                lines.push(Line::default().spans(["━ AI ━".fg(self.settings.colors.ai_color)]));
+            }
+
+            for text in wrapped_message.iter() {
+                lines.push(Line::default().spans([text.clone()]));
+            }
+
+            lines.push(Line::default());
+        }
+
+        self.max_scroll = lines.len().saturating_sub(self.top_h_size) as u16;
+        let text = Text::from(lines);
+        self.wrapped_msg = Paragraph::new(text);
+    }
+
+    pub fn scroll_bottom(&mut self) {
+        self.scroll = self.max_scroll;
     }
 }

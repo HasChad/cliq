@@ -117,4 +117,7 @@ pub fn send_message(app: &mut App) {
         Err(ChatError::Network(err_msg)) => app.popup = Popup::Error(err_msg),
         Err(ChatError::ApiResponse(err_msg)) => app.popup = Popup::Error(err_msg),
     }
+
+    app.text_wrapper();
+    app.scroll_bottom();
 }
