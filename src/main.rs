@@ -3,7 +3,6 @@ use color_eyre::{Result, eyre::Context};
 mod ai_logic;
 mod app;
 mod input;
-mod message_controller;
 mod popups;
 mod run;
 mod settings;
