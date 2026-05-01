@@ -3,9 +3,9 @@ use ratatui_textarea::{Input, Key};
 use std::fs;
 
 use crate::{
-    App, Popup,
+    App,
     ai_logic::{ChatError, Message, manage_history, send_chat_request},
-    app::FILE_PATH,
+    app::{FILE_PATH, Popup},
 };
 
 pub const MAX_INPUT_LENGTH: usize = 1000;

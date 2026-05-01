@@ -1,24 +1,15 @@
 use ratatui::{
     Frame,
-    layout::{Constraint, Direction, Layout},
     style::{Color, Style, Stylize},
     text::{Line, Text},
     widgets::{Block, BorderType, Borders, Paragraph, TitlePosition},
 };
 use ratatui_textarea::WrapMode;
 
-use crate::{App, Popup, input::MAX_INPUT_LENGTH, popups::*};
+use crate::{App, app::Popup, input::MAX_INPUT_LENGTH, popups::*};
 
 pub fn render(app: &mut App, frame: &mut Frame) {
-    let outer_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints(vec![Constraint::Percentage(90), Constraint::Min(5)]);
-
-    let [top, bottom] = outer_layout.areas(frame.area());
-
-    app.w_size = frame.area().width as usize;
-    app.top_h_size = top.height as usize;
-    app.bottom_h_size = bottom.height as usize;
+    app.get_layout(frame);
 
     frame.render_widget(
         app.wrapped_msg
@@ -33,7 +24,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                     .title(" Chat ")
                     .title_position(TitlePosition::Top),
             ),
-        top,
+        app.top_area,
     );
 
     app.textarea.set_block(
@@ -51,7 +42,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     app.textarea.set_style(Style::default().fg(Color::White));
     app.textarea.set_wrap_mode(WrapMode::Word);
     app.textarea.set_cursor_line_style(Style::default());
-    frame.render_widget(&app.textarea, bottom);
+    frame.render_widget(&app.textarea, app.bottom_area);
 
     match &app.popup {
         Popup::Welcome => popup_welcome(frame),

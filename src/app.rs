@@ -1,5 +1,7 @@
 use dotenvy::dotenv;
 use ratatui::{
+    Frame,
+    layout::{Constraint, Direction, Layout, Rect},
     style::Stylize,
     text::{Line, Text},
     widgets::Paragraph,
@@ -39,9 +41,8 @@ pub struct App<'a> {
     pub scroll: u16,
     pub max_scroll: u16,
     pub should_send_message: bool,
-    pub w_size: usize,
-    pub top_h_size: usize,
-    pub bottom_h_size: usize,
+    pub top_area: Rect,
+    pub bottom_area: Rect,
 }
 
 impl<'a> App<'a> {
@@ -98,9 +99,8 @@ impl<'a> App<'a> {
             scroll: 0,
             max_scroll: 0,
             should_send_message: false,
-            w_size: 0,
-            top_h_size: 0,
-            bottom_h_size: 0,
+            top_area: Rect::default(),
+            bottom_area: Rect::default(),
         }
     }
 
@@ -113,7 +113,7 @@ impl<'a> App<'a> {
                 continue;
             }
 
-            wrapped_message = textwrap::wrap(&message.content, self.w_size)
+            wrapped_message = textwrap::wrap(&message.content, self.top_area.width as usize)
                 .into_iter()
                 .map(|s| s.into_owned())
                 .collect();
@@ -131,12 +131,23 @@ impl<'a> App<'a> {
             lines.push(Line::default());
         }
 
-        self.max_scroll = lines.len().saturating_sub(self.top_h_size) as u16;
+        self.max_scroll = lines
+            .len()
+            .saturating_sub(self.top_area.height as usize - 1) as u16;
+
         let text = Text::from(lines);
         self.wrapped_msg = Paragraph::new(text);
     }
 
     pub fn scroll_bottom(&mut self) {
         self.scroll = self.max_scroll;
+    }
+
+    pub fn get_layout(&mut self, frame: &Frame) {
+        let outer_layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![Constraint::Percentage(90), Constraint::Min(5)]);
+
+        [self.top_area, self.bottom_area] = outer_layout.areas(frame.area());
     }
 }
