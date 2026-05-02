@@ -113,7 +113,7 @@ impl<'a> App<'a> {
                 continue;
             }
 
-            wrapped_message = textwrap::wrap(&message.content, self.top_area.width as usize)
+            wrapped_message = textwrap::wrap(&message.content, self.top_area.width as usize - 2)
                 .into_iter()
                 .map(|s| s.into_owned())
                 .collect();
