@@ -2,7 +2,7 @@ use ratatui::{
     Frame,
     layout::{Constraint, Flex, Layout, Rect},
     style::{Color, Stylize},
-    text::{Line, Text},
+    text::Line,
     widgets::{Block, Borders, Clear, Paragraph, Wrap},
 };
 
@@ -34,12 +34,10 @@ pub fn popup_welcome(frame: &mut Frame) {
             .fg(Color::Blue),
     ];
 
-    let text = Text::from(lines);
-
     let area = popup_area(frame.area(), 40, 6);
     frame.render_widget(Clear, area);
     frame.render_widget(
-        Paragraph::new(text).block(Block::new().fg(Color::Green).borders(Borders::ALL)),
+        Paragraph::new(lines).block(Block::new().fg(Color::Green).borders(Borders::ALL)),
         area,
     );
 }
@@ -69,12 +67,11 @@ pub fn popup_help(frame: &mut Frame) {
     ];
 
     let p_height = lines.len() as u16 + 2;
-    let text = Text::from(lines);
 
     let area = popup_area(frame.area(), 51, p_height);
     frame.render_widget(Clear, area);
     frame.render_widget(
-        Paragraph::new(text).block(
+        Paragraph::new(lines).block(
             Block::new()
                 .fg(Color::Green)
                 .borders(Borders::ALL)
@@ -109,12 +106,11 @@ pub fn popup_status(frame: &mut Frame, messages: &[Message]) {
     ];
 
     let p_height = lines.len() as u16 + 2;
-    let text = Text::from(lines);
 
     let area = popup_area(frame.area(), 35, p_height);
     frame.render_widget(Clear, area);
     frame.render_widget(
-        Paragraph::new(text).block(
+        Paragraph::new(lines).block(
             Block::new()
                 .fg(Color::Green)
                 .borders(Borders::ALL)
@@ -129,12 +125,10 @@ pub fn popup_sending_message(frame: &mut Frame) {
         .spans([" Sending message..."])
         .fg(Color::Yellow);
 
-    let text = Text::from(line);
-
     let area = popup_area(frame.area(), 22, 3);
     frame.render_widget(Clear, area);
     frame.render_widget(
-        Paragraph::new(text).block(Block::new().fg(Color::Blue).borders(Borders::ALL)),
+        Paragraph::new(line).block(Block::new().fg(Color::Blue).borders(Borders::ALL)),
         area,
     );
 }
@@ -152,12 +146,10 @@ pub fn popup_quit(frame: &mut Frame) {
             .centered(),
     ];
 
-    let text = Text::from(lines);
-
     let area = popup_area(frame.area(), 30, 5);
     frame.render_widget(Clear, area);
     frame.render_widget(
-        Paragraph::new(text).block(Block::new().fg(Color::LightRed).borders(Borders::ALL)),
+        Paragraph::new(lines).block(Block::new().fg(Color::LightRed).borders(Borders::ALL)),
         area,
     );
 }
@@ -168,12 +160,10 @@ pub fn popup_error(frame: &mut Frame, error_msg: &str) {
         .fg(Color::Yellow)
         .centered();
 
-    let text = Text::from(line);
-
     let area = popup_area(frame.area(), error_msg.len() as u16 + 4, 3);
     frame.render_widget(Clear, area);
     frame.render_widget(
-        Paragraph::new(text).wrap(Wrap { trim: true }).block(
+        Paragraph::new(line).wrap(Wrap { trim: true }).block(
             Block::new()
                 .fg(Color::LightRed)
                 .borders(Borders::ALL)

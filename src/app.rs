@@ -3,7 +3,7 @@ use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
     style::Stylize,
-    text::{Line, Text},
+    text::Line,
     widgets::Paragraph,
 };
 use ratatui_textarea::TextArea;
@@ -119,9 +119,13 @@ impl<'a> App<'a> {
                 .collect();
 
             if message.role == "user" {
-                lines.push(Line::default().spans(["━ You ━".fg(self.settings.colors.user_color)]));
+                lines.push(
+                    Line::default().spans(["━ You ━".fg(self.settings.colors.user_color).bold()]),
+                );
             } else if message.role == "assistant" {
-                lines.push(Line::default().spans(["━ AI ━".fg(self.settings.colors.ai_color)]));
+                lines.push(
+                    Line::default().spans(["━ AI ━".fg(self.settings.colors.ai_color).bold()]),
+                );
             }
 
             for text in wrapped_message.iter() {
@@ -135,8 +139,7 @@ impl<'a> App<'a> {
             .len()
             .saturating_sub(self.top_area.height as usize - 1) as u16;
 
-        let text = Text::from(lines);
-        self.wrapped_msg = Paragraph::new(text);
+        self.wrapped_msg = Paragraph::new(lines);
     }
 
     pub fn scroll_bottom(&mut self) {

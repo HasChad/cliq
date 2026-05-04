@@ -1,8 +1,14 @@
+use std::sync::Arc;
+
 use ratatui::{
     Frame,
+    layout::Margin,
     style::{Color, Style, Stylize},
     text::{Line, Text},
-    widgets::{Block, BorderType, Borders, Paragraph, TitlePosition},
+    widgets::{
+        Block, BorderType, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState,
+        TitlePosition,
+    },
 };
 use ratatui_textarea::WrapMode;
 
@@ -25,6 +31,21 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                     .title_position(TitlePosition::Top),
             ),
         app.top_area,
+    );
+
+    let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight).track_symbol(Some("┇"));
+    let vertical_scroll =
+        app.scroll as usize + (app.top_area.height * app.scroll / app.max_scroll) as usize;
+    let mut scrollbar_state = ScrollbarState::new((app.max_scroll + app.top_area.height) as usize)
+        .position(vertical_scroll);
+
+    frame.render_stateful_widget(
+        scrollbar,
+        app.top_area.inner(Margin {
+            vertical: 1,
+            horizontal: 0,
+        }),
+        &mut scrollbar_state,
     );
 
     app.textarea.set_block(
