@@ -3,8 +3,6 @@ use std::env;
 
 use crate::App;
 
-const MAX_HISTORY_MESSAGES: usize = 50;
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Message {
     pub role: String,
@@ -64,24 +62,7 @@ pub enum ChatError {
 
 impl From<reqwest::Error> for ChatError {
     fn from(_err: reqwest::Error) -> Self {
-        ChatError::Network("Testing... testing...".to_string())
-    }
-}
-
-pub fn manage_history(messages: &mut Vec<Message>) {
-    if messages.len() > MAX_HISTORY_MESSAGES + 1 {
-        let system_msg = messages[0].clone();
-        let recent_messages: Vec<Message> = messages
-            .iter()
-            .skip(messages.len() - MAX_HISTORY_MESSAGES)
-            .cloned()
-            .collect();
-
-        messages.clear();
-        messages.push(system_msg);
-        messages.extend(recent_messages);
-
-        println!("Conversation history trimmed to keep recent messages\n",);
+        ChatError::Network("Please check your internet connection.".to_string())
     }
 }
 

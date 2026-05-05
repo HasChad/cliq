@@ -25,6 +25,7 @@ pub enum Popup {
     Help,
     Status,
     SendingMessage,
+    // Info(String),
     Quit,
     Error(String),
 }

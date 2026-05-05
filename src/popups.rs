@@ -133,6 +133,22 @@ pub fn popup_sending_message(frame: &mut Frame) {
     );
 }
 
+// pub fn popup_info(frame: &mut Frame, msg: &str) {
+//     let line = Line::default().spans([msg]).fg(Color::White).centered();
+
+//     let area = popup_area(frame.area(), msg.len() as u16 + 4, 3);
+//     frame.render_widget(Clear, area);
+//     frame.render_widget(
+//         Paragraph::new(line).wrap(Wrap { trim: true }).block(
+//             Block::new()
+//                 .fg(Color::Green)
+//                 .borders(Borders::ALL)
+//                 .title(" Info "),
+//         ),
+//         area,
+//     );
+// }
+
 pub fn popup_quit(frame: &mut Frame) {
     let lines = vec![
         Line::default()

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use ratatui::{
     Frame,
     layout::Margin,
@@ -71,6 +69,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         Popup::Status => popup_status(frame, &app.messages),
         Popup::Quit => popup_quit(frame),
         Popup::SendingMessage => popup_sending_message(frame),
+        // Popup::Info(msg) => popup_info(frame, msg),
         Popup::Error(msg) => popup_error(frame, msg.as_str()),
         Popup::None => {}
     }

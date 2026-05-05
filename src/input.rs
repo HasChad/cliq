@@ -4,7 +4,7 @@ use std::fs;
 
 use crate::{
     App,
-    ai_logic::{ChatError, Message, manage_history, send_chat_request},
+    ai_logic::{ChatError, Message, send_chat_request},
     app::{FILE_PATH, Popup},
 };
 
@@ -96,6 +96,21 @@ fn process_input(app: &mut App) {
     app.popup = Popup::SendingMessage;
 }
 
+const MAX_HISTORY_MESSAGES: usize = 50;
+
+pub fn manage_history(messages: &mut Vec<Message>) {
+    let system_msg = messages[0].clone();
+    let recent_messages: Vec<Message> = messages
+        .iter()
+        .skip(messages.len() - MAX_HISTORY_MESSAGES)
+        .cloned()
+        .collect();
+
+    messages.clear();
+    messages.push(system_msg);
+    messages.extend(recent_messages);
+}
+
 pub fn send_message(app: &mut App) {
     let message: String = app.textarea.lines().join(" ");
     app.textarea.clear();
@@ -104,7 +119,9 @@ pub fn send_message(app: &mut App) {
     app.should_send_message = false;
     app.popup = Popup::None;
 
-    manage_history(&mut app.messages);
+    if app.messages.len() > MAX_HISTORY_MESSAGES {
+        manage_history(&mut app.messages);
+    }
 
     match send_chat_request(app) {
         Ok(reply) => {
