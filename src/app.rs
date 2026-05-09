@@ -140,6 +140,8 @@ impl<'a> App<'a> {
             .len()
             .saturating_sub(self.top_area.height as usize - 1) as u16;
 
+        self.scroll = (self.scroll).min(self.max_scroll);
+
         self.wrapped_msg = Paragraph::new(lines);
     }
 

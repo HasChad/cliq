@@ -35,6 +35,10 @@ pub fn run_app(mut app: &mut App, mut terminal: DefaultTerminal) -> Result<()> {
             } else {
                 match read()? {
                     Event::Key(event) => input_controller(event, &mut app),
+                    Event::Resize(_, _) => {
+                        app.get_layout(&terminal.get_frame());
+                        app.text_wrapper();
+                    }
                     _ => (),
                 }
             }
