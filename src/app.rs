@@ -152,7 +152,7 @@ impl<'a> App<'a> {
     pub fn get_layout(&mut self, frame: &Frame) {
         let outer_layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![Constraint::Percentage(90), Constraint::Min(5)]);
+            .constraints(vec![Constraint::Percentage(90), Constraint::Min(7)]);
 
         [self.top_area, self.bottom_area] = outer_layout.areas(frame.area());
     }
